@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* Design tokens from the reference design (README §Design Tokens) */
+  --color-bg: oklch(0.15 0.014 258);
+  --color-surface: oklch(0.19 0.016 258);
+  --color-chip: oklch(0.24 0.016 258);
+  --color-border: oklch(0.32 0.02 260);
+  --color-border-subtle: oklch(0.28 0.018 260);
+  --color-fg: oklch(0.96 0.004 258);
+  --color-muted: oklch(0.72 0.012 258);
+  --color-accent: oklch(0.72 0.16 250);
+  --color-accent-dark: oklch(0.12 0.01 258);
+  --color-success: oklch(0.76 0.15 150);
+  --color-error: oklch(0.7 0.18 30);
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --animate-psb-spin: psb-spin 0.9s linear infinite;
+
+  @keyframes psb-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: var(--color-accent);
+}
+a:hover {
+  color: oklch(0.8 0.14 250);
+}
+::selection {
+  background: oklch(0.72 0.16 250 / 0.35);
+}
+
+/* Cut-corner "notch" shape for primary actions / brand mark. */
+.notch-8 {
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.notch-10 {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.notch-6 {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}

@@ -1,0 +1,250 @@
+---
+import '../styles/global.css';
+import Converter from '../components/Converter';
+
+const howSteps = [
+  { n: '1', title: 'Back up your saves', desc: 'Copy your SaveGames folder somewhere safe before converting anything.' },
+  { n: '2', title: 'Pick a direction & upload', desc: 'Choose co-op → dedicated or the reverse, then drop your save folder in.' },
+  { n: '3', title: 'Select world & identity', desc: 'Pick the world, the host character, and enter your SteamID64 if needed.' },
+  { n: '4', title: 'Download & deploy', desc: 'Get your converted zip and extract it into the right SaveGames path.' },
+];
+
+const faqItems = [
+  {
+    q: 'How do I move my Palworld co-op world to a dedicated server?',
+    a: "Upload your save, pick the world and host character, enter your SteamID64, then download the converted zip and extract it into your server's SaveGames folder.",
+  },
+  {
+    q: 'Do I need a blank character on the server first?',
+    a: "No, not if you're on Steam — your SteamID64 is enough to derive the correct player GUID. For Xbox, PlayStation, or crossplay you can paste a raw GUID instead.",
+  },
+  {
+    q: 'Why does my character reset on a dedicated server?',
+    a: 'Co-op hosts are hard-coded to GUID …0001, while dedicated servers assign a unique GUID per Steam account. Without rewriting it, you get a fresh, empty character.',
+  },
+  {
+    q: 'Is my save file uploaded anywhere?',
+    a: 'No. Everything runs locally in your browser — your files are never sent to a server.',
+  },
+  {
+    q: 'Will my bases and pals survive the conversion?',
+    a: 'Yes. World data lives in Level.sav and is preserved; only the character, guild, and pal ownership references tied to the GUID are rewritten.',
+  },
+  {
+    q: 'Why is my map dark after migrating?',
+    a: 'Map discovery data lives in LocalData.sav on your PC, not in the world save. Join once, then copy that file over from your old save folder.',
+  },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Move your Palworld save between co-op and dedicated server. Fixes the host save GUID mismatch entirely in your browser — nothing is uploaded."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <title>Pal Save Bridge — Palworld Save Game Converter</title>
+  </head>
+  <body>
+    <div class="min-h-screen relative overflow-x-hidden">
+      <!-- ambient glow -->
+      <div
+        class="absolute -top-[120px] -left-[100px] w-[440px] h-[440px] rounded-full bg-[oklch(0.72_0.16_250/0.16)] blur-[90px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="absolute top-[340px] -right-[160px] w-[520px] h-[520px] rounded-full bg-[oklch(0.72_0.16_250/0.1)] blur-[110px] pointer-events-none"
+      >
+      </div>
+
+      <header
+        id="site-header"
+        class="sticky top-0 z-50 flex items-center justify-between px-8 py-4 transition-all duration-[250ms] ease-in-out border-b border-transparent"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="notch-8 w-[38px] h-[38px] bg-accent flex items-center justify-center font-extrabold text-accent-dark text-lg shrink-0"
+          >
+            P
+          </div>
+          <span class="font-bold text-[17px] tracking-[-0.01em]">Pal Save Bridge</span>
+        </div>
+        <nav class="flex items-center gap-6">
+          <a
+            href="#how-it-works"
+            class="!text-muted hover:!text-fg text-sm font-medium no-underline hidden sm:block">How it works</a
+          >
+          <a href="#faq" class="!text-muted hover:!text-fg text-sm font-medium no-underline hidden sm:block"
+            >FAQ</a
+          >
+          <span
+            class="hidden md:flex items-center gap-1.5 text-xs text-muted border border-border px-3 py-1.5 rounded-[20px] whitespace-nowrap"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_oklch(0.76_0.15_150)]"></span>
+            Client-side only
+          </span>
+          <a
+            href="#converter"
+            class="notch-8 bg-accent !text-accent-dark px-5 py-2.5 font-bold text-sm no-underline whitespace-nowrap transition-shadow hover:shadow-[0_0_24px_oklch(0.72_0.16_250/0.55)]"
+            >Start Converting</a
+          >
+        </nav>
+      </header>
+
+      <section class="max-w-[920px] mx-auto px-8 pt-[110px] pb-[72px] text-center relative">
+        <div
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 border border-border rounded-[20px] text-xs text-muted mb-7"
+        >
+          Fan-made tool · Not affiliated with Pocketpair
+        </div>
+        <h1
+          class="text-[clamp(34px,5vw,56px)] font-extrabold leading-[1.08] tracking-[-0.02em] m-0 mb-5 text-balance"
+        >
+          Move your Palworld save between <span class="text-accent">co-op</span> and <span
+            class="text-accent">dedicated server</span
+          >
+        </h1>
+        <p class="text-lg leading-relaxed text-muted max-w-[620px] mx-auto mb-9 text-pretty">
+          Fix the host save GUID mismatch without installing anything. Everything runs right in your
+          browser — your save files never leave your PC.
+        </p>
+        <a
+          href="#converter"
+          class="notch-10 inline-block bg-accent !text-accent-dark px-8 py-4 font-bold text-base no-underline transition-shadow hover:shadow-[0_0_32px_oklch(0.72_0.16_250/0.55)]"
+          >Start Converting →</a
+        >
+
+        <div class="flex justify-center gap-7 mt-12 flex-wrap">
+          {
+            ['Processed locally in-browser', 'Nothing uploaded, ever', 'Free & instant'].map((t) => (
+              <div class="flex items-center gap-2 text-[13px] text-muted">
+                <span class="w-1.5 h-1.5 rounded-full bg-success" />
+                {t}
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section id="converter" class="max-w-[880px] mx-auto px-8 pt-5 pb-[100px] scroll-mt-20">
+        <Converter client:load />
+      </section>
+
+      <section id="how-it-works" class="max-w-[1040px] mx-auto px-8 pt-5 pb-[100px] scroll-mt-20">
+        <div class="text-center mb-14">
+          <h2 class="text-[clamp(28px,3.5vw,38px)] font-extrabold tracking-[-0.01em] m-0 mb-3.5">
+            How it works
+          </h2>
+          <p class="text-base text-muted max-w-[560px] mx-auto m-0">
+            Every character has a player GUID. Co-op hosts are hard-coded to <code
+              class="font-mono bg-chip px-1.5 py-0.5 rounded">…0001</code
+            >; dedicated servers generate one per Steam account. Skip the rewrite and you spawn on
+            the beach with an empty inventory.
+          </p>
+        </div>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5">
+          {
+            howSteps.map((s) => (
+              <div class="bg-surface border border-border rounded-[14px] p-6">
+                <div class="w-[34px] h-[34px] rounded-lg bg-[oklch(0.72_0.16_250/0.15)] text-accent flex items-center justify-center font-extrabold text-sm mb-4">
+                  {s.n}
+                </div>
+                <div class="font-bold text-[15px] mb-2">{s.title}</div>
+                <div class="text-[13px] text-muted leading-relaxed">{s.desc}</div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="max-w-[880px] mx-auto px-8 pb-[100px]">
+        <div class="bg-surface border border-border rounded-2xl p-8 flex gap-5 items-start">
+          <div class="text-[26px] shrink-0">🔒</div>
+          <div>
+            <div class="font-bold text-base mb-2">Your save never leaves your PC</div>
+            <div class="text-sm text-muted leading-relaxed">
+              All parsing, GUID rewriting, and zipping happen locally in your browser using
+              client-side code. Nothing is uploaded, and no data is stored once you close this tab.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="max-w-[800px] mx-auto px-8 pt-5 pb-[110px] scroll-mt-20">
+        <h2 class="text-[clamp(28px,3.5vw,38px)] font-extrabold tracking-[-0.01em] m-0 mb-8 text-center">
+          Frequently asked questions
+        </h2>
+        <div class="flex flex-col gap-2.5">
+          {
+            faqItems.map((f, i) => (
+              <div class="faq-item bg-surface border border-border rounded-xl overflow-hidden" data-faq={i}>
+                <button
+                  type="button"
+                  class="faq-toggle w-full text-left bg-transparent border-none px-[22px] py-[18px] text-fg font-semibold text-[15px] cursor-pointer flex justify-between items-center gap-3"
+                >
+                  <span>{f.q}</span>
+                  <span class="faq-chevron inline-block transition-transform duration-150 text-[11px] text-muted">
+                    ▼
+                  </span>
+                </button>
+                <div class="faq-answer hidden px-[22px] pb-[18px] text-sm text-muted leading-relaxed">
+                  {f.a}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <footer class="border-t border-border-subtle px-8 py-9">
+        <div class="max-w-[1040px] mx-auto flex justify-between items-center flex-wrap gap-4">
+          <div class="flex items-center gap-2.5">
+            <div class="notch-6 w-[26px] h-[26px] bg-accent"></div>
+            <span class="text-[13px] text-muted">
+              Pal Save Bridge · fan-made, not affiliated with Pocketpair
+            </span>
+          </div>
+          <span class="text-[13px] text-muted">© 2026</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Header blur/border on scroll
+      const header = document.getElementById('site-header')!;
+      const scrolledCls = ['bg-[oklch(0.15_0.014_258/0.72)]', 'backdrop-blur-[14px]', '!border-border'];
+      const onScroll = () => {
+        const scrolled = window.scrollY > 12;
+        for (const c of scrolledCls) header.classList.toggle(c, scrolled);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // FAQ accordion (one open at a time; first open by default)
+      const items = Array.from(document.querySelectorAll<HTMLElement>('.faq-item'));
+      const setOpen = (item: HTMLElement, open: boolean) => {
+        item.querySelector('.faq-answer')!.classList.toggle('hidden', !open);
+        (item.querySelector('.faq-chevron') as HTMLElement).style.transform = open
+          ? 'rotate(180deg)'
+          : 'rotate(0deg)';
+        item.dataset.open = open ? '1' : '';
+      };
+      items.forEach((item, i) => {
+        setOpen(item, i === 0);
+        item.querySelector('.faq-toggle')!.addEventListener('click', () => {
+          const willOpen = !item.dataset.open;
+          items.forEach((it) => setOpen(it, false));
+          if (willOpen) setOpen(item, true);
+        });
+      });
+    </script>
+  </body>
+</html>
